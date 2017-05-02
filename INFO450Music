@@ -1,0 +1,220 @@
+// ConsoleApplication16.cpp : Defines the entry point for the console application.
+//
+
+#include "stdafx.h"
+#include <fstream>
+#include <stdio.h>
+#include <iostream>
+#include <cstdlib>
+using namespace std;
+
+
+class node
+{	
+	char artist[50];
+	char song[50];
+	node *next;
+
+public:
+	node(char a[50], char s[50]);
+	friend class linkedList;
+
+};
+
+node::node(char a[50], char s[50])
+{
+
+	strcpy_s(artist, a);
+	strcpy_s(song, s);
+	next = NULL;
+}
+
+class linkedList
+{
+	node *head;
+	node *tail;
+
+public: 
+
+	linkedList();
+	void addToEnd(node *nptr);
+	void addtoHead(node *nptr);
+	int insertAfter(node *ptr, char d[]);
+	int removeNode(char d[]);
+	void showList();
+	int getFile(char file[]);
+
+};
+
+linkedList::linkedList()
+{
+	head = NULL;
+	tail = NULL;
+}
+
+int linkedList::getFile(char file[])
+{
+	ifstream infile(file);
+	if (!infile)
+	{
+		return -1;
+	}
+	while (!infile.eof())
+	{
+
+		char artist[50];
+		char song[50];
+
+		infile.getline(artist, 50, ',');
+		infile.getline(song, 50);
+
+		node * newnode = new node(artist, song);
+		this->addToEnd(newnode);
+	}
+	infile.close();
+}
+
+void linkedList::showList()
+{
+
+	char userinput;
+	node *ptr;
+	ptr = head;
+	cout << "****Music Play List****" << endl;
+	if (ptr == NULL)
+	{
+		cout << "The list is empty" << endl;
+		return;
+	}
+
+	while (ptr != NULL)
+	{
+
+		cout << "Welcome:" << ptr->artist << ptr->song << endl;
+		cout << "[P]lay, [S]kip, [D]elete, [Q]uit?" << endl;
+		cin >> userinput;
+		cin.clear();
+		cin.ignore();
+
+		if (userinput == 'P' || 'p')
+		{
+			cout << "Song Playing is:" << ptr->song << endl;
+		}
+		else if (userinput == 'S' || 's')
+		{
+			cout << "Skipping:" << ptr->song << endl;
+		}
+		else if (userinput == 'D' || 'd')
+		{
+			cout << "Deleting:" << ptr->song << endl;
+		}
+		else if (userinput == 'Q' || 'q')
+		{ 
+			cout << "Thank you for listening" << endl;
+			return;
+		}
+		ptr = ptr->next;
+
+	}
+
+}
+
+
+
+void linkedList::addToEnd(node *ptr)
+{
+	if (head == NULL)
+	{
+		head = ptr;
+		tail = ptr;
+	}
+	else
+	{
+		tail->next = ptr; 
+		tail = ptr;
+	}
+}
+
+void linkedList::addtoHead(node *ptr)
+{
+	if (head == NULL)
+	{
+		head = ptr;
+		tail = ptr;
+	}
+	else
+	{
+		ptr->next = head;
+		head = ptr;
+	}
+}
+
+
+int linkedList::insertAfter(node *newnode, char d[])
+{
+	node *ptr = head;
+	while (ptr != NULL);
+	{
+		if (ptr->artist == d)
+		{
+			newnode->next = ptr->next;
+			ptr->next = newnode;
+			if (tail == ptr)
+				tail = newnode;
+			return 0;
+		}
+		ptr = ptr->next;
+	}
+	return -1;
+}
+
+int linkedList::removeNode(char d[])
+{
+	node *ptr = head;
+	if (ptr == NULL)
+		return -1;
+	if (head->artist == d)
+	{
+		if (head == tail)
+		{
+			head = NULL;
+			tail = NULL;
+		}
+		else
+			head = head->next;
+		delete ptr;
+		return 0;
+	}
+
+	while (ptr != NULL)
+	{
+		if (ptr->next && (ptr->next)->artist == d)
+		{
+			if (tail == ptr->next)
+				tail = ptr;
+			node *tbd = ptr->next;
+			ptr->next = (ptr->next)->next;
+			delete tbd;
+			return 0;
+		}
+		ptr = ptr->next;
+	}
+	return -1;
+}
+
+int main()
+{
+	
+	char filename[100];
+	cout << "Please enter full filepath name:" << endl;
+
+	gets_s(filename);
+	linkedList *mylist = new linkedList();
+	mylist->getFile(filename);
+
+	mylist->showList();
+	
+	
+	return 0;
+}
+
